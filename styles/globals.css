@@ -1,3 +1,26 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Style global */
+body {
+  @apply bg-lefordac-light text-lefordac-dark font-sans;
+}
+
+/* Titres */
+h1, h2, h3, h4 {
+  @apply font-serif text-lefordac-primary;
+}
+
+/* Paragraphes */
+p {
+  @apply text-base leading-relaxed;
+}
+
+/* Liens */
+a {
+  @apply transition-colors duration-200;
+}
+a:hover {
+  @apply text-lefordac-secondary;
+}

@@ -1,5 +1,3 @@
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 import { useState } from "react";
 import axios from "axios";
 import { cameroonData } from "../utils/cameroon-data";
@@ -7,14 +5,16 @@ import { cameroonData } from "../utils/cameroon-data";
 export default function Contact() {
   const [form, setForm] = useState({
     nom: "",
+    telephone: "",
     email: "",
+    sujet: "",
     message: "",
     region: "",
     departement: "",
     arrondissement: "",
-    ville: ""
   });
-  const [success, setSuccess] = useState(false);
+
+  const [status, setStatus] = useState(null);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -23,146 +23,162 @@ export default function Contact() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/contact`, form);
-      setSuccess(true);
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/messages`, form);
+      setStatus("Message envoyé ✅");
       setForm({
         nom: "",
+        telephone: "",
         email: "",
+        sujet: "",
         message: "",
         region: "",
         departement: "",
         arrondissement: "",
-        ville: ""
       });
-    } catch (err) {
-      console.error("Erreur:", err);
-      alert("Impossible d’envoyer le message.");
+    } catch (error) {
+      console.error("Erreur envoi message:", error);
+      setStatus("Une erreur est survenue ❌");
     }
   };
 
+  const regions = Object.keys(cameroonData);
+  const departements = form.region ? Object.keys(cameroonData[form.region]) : [];
+  const arrondissements =
+    form.region && form.departement
+      ? cameroonData[form.region][form.departement]
+      : [];
+
   return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      <main className="flex-grow p-8 bg-gray-50">
-        <h1 className="text-3xl font-bold text-green-700 mb-6">Contactez-nous</h1>
+    <main className="p-8 max-w-xl mx-auto bg-lefordac-light">
+      <h1 className="text-3xl font-bold font-serif text-center text-lefordac-primary mb-6">
+        Contactez-nous
+      </h1>
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white shadow-md rounded-lg p-6 space-y-4"
+      >
+        <input
+          type="text"
+          name="nom"
+          placeholder="Nom complet"
+          value={form.nom}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+          required
+        />
 
-        {success && (
-          <div className="mb-4 p-3 bg-green-100 text-green-700 rounded">
-            ✅ Votre message a été envoyé avec succès ! Un responsable local vous répondra bientôt.
-          </div>
-        )}
+        <input
+          type="tel"
+          name="telephone"
+          placeholder="Téléphone"
+          value={form.telephone}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        />
 
-        <form
-          onSubmit={handleSubmit}
-          className="max-w-lg bg-white p-6 shadow rounded-lg space-y-4"
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={form.email}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        />
+
+        <input
+          type="text"
+          name="sujet"
+          placeholder="Sujet"
+          value={form.sujet}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+          required
+        />
+
+        <textarea
+          name="message"
+          placeholder="Votre message"
+          value={form.message}
+          onChange={handleChange}
+          rows="4"
+          className="w-full border p-2 rounded"
+          required
+        />
+
+        {/* Région */}
+        <select
+          name="region"
+          value={form.region}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              region: e.target.value,
+              departement: "",
+              arrondissement: "",
+            })
+          }
+          className="w-full border p-2 rounded"
+          required
         >
-          <input
-            type="text"
-            name="nom"
-            placeholder="Nom"
-            value={form.nom}
-            onChange={handleChange}
-            required
-            className="w-full border p-2 rounded"
-          />
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-            required
-            className="w-full border p-2 rounded"
-          />
-          <textarea
-            name="message"
-            placeholder="Message"
-            rows="4"
-            value={form.message}
-            onChange={handleChange}
-            required
-            className="w-full border p-2 rounded"
-          ></textarea>
+          <option value="">Sélectionnez une région</option>
+          {regions.map((r) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
+          ))}
+        </select>
 
-          {/* Région */}
-          <select
-            name="region"
-            value={form.region}
-            onChange={handleChange}
-            className="w-full border p-2 rounded"
-          >
-            <option value="">-- Sélectionnez une Région --</option>
-            {Object.keys(cameroonData).map((region) => (
-              <option key={region} value={region}>
-                {region}
-              </option>
-            ))}
-          </select>
-
-          {/* Département */}
+        {/* Département */}
+        {form.region && (
           <select
             name="departement"
             value={form.departement}
-            onChange={handleChange}
-            disabled={!form.region}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                departement: e.target.value,
+                arrondissement: "",
+              })
+            }
             className="w-full border p-2 rounded"
+            required
           >
-            <option value="">-- Sélectionnez un Département --</option>
-            {form.region &&
-              Object.keys(cameroonData[form.region]).map((dep) => (
-                <option key={dep} value={dep}>
-                  {dep}
-                </option>
-              ))}
+            <option value="">Sélectionnez un département</option>
+            {departements.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
           </select>
+        )}
 
-          {/* Arrondissement */}
+        {/* Arrondissement */}
+        {form.departement && (
           <select
             name="arrondissement"
             value={form.arrondissement}
             onChange={handleChange}
-            disabled={!form.departement}
             className="w-full border p-2 rounded"
+            required
           >
-            <option value="">-- Sélectionnez un Arrondissement --</option>
-            {form.region &&
-              form.departement &&
-              cameroonData[form.region][form.departement].arrondissements.map(
-                (arr) => (
-                  <option key={arr} value={arr}>
-                    {arr}
-                  </option>
-                )
-              )}
+            <option value="">Sélectionnez un arrondissement</option>
+            {arrondissements.map((a) => (
+              <option key={a} value={a}>
+                {a}
+              </option>
+            ))}
           </select>
+        )}
 
-          {/* Ville avec auto-complétion */}
-          <input
-            type="text"
-            name="ville"
-            list="ville-options"
-            placeholder="Ville"
-            value={form.ville}
-            onChange={handleChange}
-            className="w-full border p-2 rounded"
-          />
-          <datalist id="ville-options">
-            {form.region &&
-              form.departement &&
-              cameroonData[form.region][form.departement].villes.map((v) => (
-                <option key={v} value={v} />
-              ))}
-          </datalist>
+        <button
+          type="submit"
+          className="bg-lefordac-primary text-white px-4 py-2 rounded hover:bg-lefordac-secondary"
+        >
+          Envoyer
+        </button>
 
-          <button
-            type="submit"
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          >
-            Envoyer
-          </button>
-        </form>
-      </main>
-      <Footer />
-    </div>
+        {status && <p className="mt-2 text-sm font-medium">{status}</p>}
+      </form>
+    </main>
   );
 }

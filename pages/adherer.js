@@ -1,5 +1,3 @@
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 import { useState } from "react";
 import axios from "axios";
 import { cameroonData } from "../utils/cameroon-data";
@@ -7,184 +5,146 @@ import { cameroonData } from "../utils/cameroon-data";
 export default function Adherer() {
   const [form, setForm] = useState({
     nom: "",
-    prenom: "",
-    email: "",
     telephone: "",
     region: "",
     departement: "",
     arrondissement: "",
-    photo: null,
   });
-  const [message, setMessage] = useState("");
+
+  const [status, setStatus] = useState(null);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleFileChange = (e) => {
-    setForm({ ...form, photo: e.target.files[0] });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
-
     try {
-      const data = new FormData();
-      data.append("nom", form.nom);
-      data.append("prenom", form.prenom);
-      data.append("email", form.email);
-      data.append("telephone", form.telephone);
-      data.append("region", form.region);
-      data.append("departement", form.departement);
-      data.append("arrondissement", form.arrondissement);
-      if (form.photo) data.append("photo", form.photo);
-
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/members`, data, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      setMessage(
-        "✅ Votre demande d'adhésion a bien été enregistrée ! Un responsable du parti dans votre localité prendra contact avec vous."
-      );
-
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/members`, form);
+      setStatus("Votre adhésion a été enregistrée ✅");
       setForm({
         nom: "",
-        prenom: "",
-        email: "",
         telephone: "",
         region: "",
         departement: "",
         arrondissement: "",
-        photo: null,
       });
-    } catch (err) {
-      console.error("Erreur adhésion:", err);
-      setMessage("❌ Une erreur est survenue, veuillez réessayer.");
+    } catch (error) {
+      console.error("Erreur adhésion:", error);
+      setStatus("Une erreur est survenue ❌");
     }
   };
 
+  const regions = Object.keys(cameroonData);
+  const departements = form.region ? Object.keys(cameroonData[form.region]) : [];
+  const arrondissements =
+    form.region && form.departement
+      ? cameroonData[form.region][form.departement]
+      : [];
+
   return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      <main className="flex-grow p-6 bg-gray-50">
-        <h1 className="text-3xl font-bold text-green-700 mb-6">Adhérer au FORDAC</h1>
+    <main className="p-8 max-w-xl mx-auto bg-lefordac-light">
+      <h1 className="text-3xl font-bold font-serif text-center text-lefordac-primary mb-6">
+        Formulaire d’adhésion
+      </h1>
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white shadow-md rounded-lg p-6 space-y-4"
+      >
+        <input
+          type="text"
+          name="nom"
+          placeholder="Nom complet"
+          value={form.nom}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+          required
+        />
 
-        {message && (
-          <div
-            className={`mb-4 p-3 rounded ${
-              message.startsWith("✅") ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-            }`}
-          >
-            {message}
-          </div>
-        )}
+        <input
+          type="tel"
+          name="telephone"
+          placeholder="Téléphone"
+          value={form.telephone}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+          required
+        />
 
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white p-6 shadow rounded-lg space-y-4 max-w-xl"
-          encType="multipart/form-data"
+        {/* Région */}
+        <select
+          name="region"
+          value={form.region}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              region: e.target.value,
+              departement: "",
+              arrondissement: "",
+            })
+          }
+          className="w-full border p-2 rounded"
+          required
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input
-              type="text"
-              name="nom"
-              placeholder="Nom"
-              value={form.nom}
-              onChange={handleChange}
-              className="border p-2 rounded w-full"
-              required
-            />
-            <input
-              type="text"
-              name="prenom"
-              placeholder="Prénom"
-              value={form.prenom}
-              onChange={handleChange}
-              className="border p-2 rounded w-full"
-              required
-            />
-          </div>
+          <option value="">Sélectionnez une région</option>
+          {regions.map((r) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
+          ))}
+        </select>
 
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-            className="border p-2 rounded w-full"
-          />
-
-          <input
-            type="text"
-            name="telephone"
-            placeholder="Téléphone"
-            value={form.telephone}
-            onChange={handleChange}
-            className="border p-2 rounded w-full"
-            required
-          />
-
-          {/* Région */}
-          <select
-            name="region"
-            value={form.region}
-            onChange={handleChange}
-            className="border p-2 rounded w-full"
-            required
-          >
-            <option value="">-- Sélectionner une Région --</option>
-            {Object.keys(cameroonData).map((region) => (
-              <option key={region} value={region}>
-                {region}
-              </option>
-            ))}
-          </select>
-
-          {/* Département */}
+        {/* Département */}
+        {form.region && (
           <select
             name="departement"
             value={form.departement}
-            onChange={handleChange}
-            disabled={!form.region}
-            className="border p-2 rounded w-full"
+            onChange={(e) =>
+              setForm({
+                ...form,
+                departement: e.target.value,
+                arrondissement: "",
+              })
+            }
+            className="w-full border p-2 rounded"
             required
           >
-            <option value="">-- Sélectionner un Département --</option>
-            {form.region &&
-              Object.keys(cameroonData[form.region]).map((dep) => (
-                <option key={dep} value={dep}>
-                  {dep}
-                </option>
-              ))}
+            <option value="">Sélectionnez un département</option>
+            {departements.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
           </select>
+        )}
 
-          {/* Arrondissement */}
+        {/* Arrondissement */}
+        {form.departement && (
           <select
             name="arrondissement"
             value={form.arrondissement}
             onChange={handleChange}
-            disabled={!form.departement}
-            className="border p-2 rounded w-full"
+            className="w-full border p-2 rounded"
             required
           >
-            <option value="">-- Sélectionner un Arrondissement --</option>
-            {form.region &&
-              form.departement &&
-              cameroonData[form.region][form.departement].arrondissements.map((arr) => (
-                <option key={arr} value={arr}>
-                  {arr}
-                </option>
-              ))}
+            <option value="">Sélectionnez un arrondissement</option>
+            {arrondissements.map((a) => (
+              <option key={a} value={a}>
+                {a}
+              </option>
+            ))}
           </select>
+        )}
 
-          {/* Upload photo */}
-          <input
-            type="file"
-            name="photo"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="border p-2 rounded w-full"
-          />
-          {form.photo && (
-            <p className="text-sm text-gray-600">Photo sé
+        <button
+          type="submit"
+          className="bg-lefordac-primary text-white px-4 py-2 rounded hover:bg-lefordac-secondary"
+        >
+          Envoyer
+        </button>
+
+        {status && <p className="mt-2 text-sm font-medium">{status}</p>}
+      </form>
+    </main>
+  );
+}
