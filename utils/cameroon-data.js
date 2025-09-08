@@ -1,49 +1,84 @@
+// utils/cameroon-data.js
+// Hiérarchie administrative : Région -> Départements -> Arrondissements
+// Source : MINATD Cameroun (simplifié pour usage applicatif)
+
 export const cameroonData = {
   "Adamaoua": {
-    "Vina": {
-      arrondissements: ["Ngaoundéré 1er", "Ngaoundéré 2e", "Ngaoundéré 3e"],
-      villes: ["Ngaoundéré"]
-    },
-    "Djérem": {
-      arrondissements: ["Tibati", "Ngaoundal"],
-      villes: ["Tibati", "Ngaoundal"]
-    }
+    "Djérem": ["Tibati", "Ngaoundal"],
+    "Faro-et-Déo": ["Tignère", "Galim-Tignère"],
+    "Mbéré": ["Meiganga", "Ngaoui", "Dir"],
+    "Vina": ["Ngaoundéré I", "Ngaoundéré II", "Ngaoundéré III"],
+    "Mayo-Banyo": ["Banyo", "Bankim"]
   },
   "Centre": {
-    "Mfoundi": {
-      arrondissements: [
-        "Yaoundé 1er", "Yaoundé 2e", "Yaoundé 3e",
-        "Yaoundé 4e", "Yaoundé 5e", "Yaoundé 6e", "Yaoundé 7e"
-      ],
-      villes: ["Yaoundé"]
-    },
-    "Haute-Sanaga": {
-      arrondissements: ["Nanga-Eboko"],
-      villes: ["Nanga-Eboko"]
-    }
+    "Haute-Sanaga": ["Nanga-Eboko", "Bibey", "Lembe-Yezoum"],
+    "Lekié": ["Monatele", "Ebebda", "Obala", "Sa’a"],
+    "Mbam-et-Inoubou": ["Bafia", "Ndikiniméki", "Ombessa"],
+    "Mbam-et-Kim": ["Ntui", "Mbangassina"],
+    "Méfou-et-Afamba": ["Mfou"],
+    "Méfou-et-Akono": ["Ngoumou"],
+    "Mfoundi": ["Yaoundé I", "Yaoundé II", "Yaoundé III", "Yaoundé IV", "Yaoundé V", "Yaoundé VI", "Yaoundé VII"],
+    "Nyong-et-Kellé": ["Éséka"],
+    "Nyong-et-Mfoumou": ["Akonolinga"],
+    "Nyong-et-So’o": ["Mbalmayo"]
+  },
+  "Est": {
+    "Boumba-et-Ngoko": ["Yokadouma", "Moloundou"],
+    "Haut-Nyong": ["Abong-Mbang", "Lomié", "Messamena"],
+    "Kadey": ["Batouri"],
+    "Lom-et-Djérem": ["Bertoua I", "Bertoua II", "Garoua-Boulaï"]
+  },
+  "Extrême-Nord": {
+    "Diamaré": ["Maroua I", "Maroua II", "Maroua III", "Bogo"],
+    "Logone-et-Chari": ["Kousséri", "Fotokol"],
+    "Mayo-Danay": ["Yagoua", "Guéré"],
+    "Mayo-Kani": ["Kaélé"],
+    "Mayo-Sava": ["Mora"],
+    "Mayo-Tsanaga": ["Mokolo"]
   },
   "Littoral": {
-    "Wouri": {
-      arrondissements: [
-        "Douala 1er", "Douala 2e", "Douala 3e",
-        "Douala 4e", "Douala 5e", "Douala 6e"
-      ],
-      villes: ["Douala"]
-    },
-    "Sanaga-Maritime": {
-      arrondissements: ["Édéa 1er", "Édéa 2e"],
-      villes: ["Édéa"]
-    },
-    "Moungo": {
-      arrondissements: [
-        "Nkongsamba 1er", "Nkongsamba 2e", "Nkongsamba 3e",
-        "Mbanga", "Loum", "Manjo", "Melong",
-        "Baré-Bakem", "Penja"
-      ],
-      villes: [
-        "Nkongsamba", "Mbanga", "Loum",
-        "Manjo", "Melong", "Baré-Bakem", "Penja"
-      ]
-    }
+    "Moungo": ["Nkongsamba I", "Nkongsamba II", "Nkongsamba III"],
+    "Nkam": ["Yabassi"],
+    "Sanaga-Maritime": ["Édéa I", "Édéa II"],
+    "Wouri": ["Douala I", "Douala II", "Douala III", "Douala IV", "Douala V", "Douala VI"]
+  },
+  "Nord": {
+    "Bénoué": ["Garoua I", "Garoua II", "Garoua III"],
+    "Faro": ["Poli"],
+    "Mayo-Louti": ["Guider"],
+    "Mayo-Rey": ["Tcholliré"]
+  },
+  "Nord-Ouest": {
+    "Boyo": ["Fundong"],
+    "Bui": ["Kumbo"],
+    "Donga-Mantung": ["Nkambé"],
+    "Menchum": ["Wum"],
+    "Mezam": ["Bamenda I", "Bamenda II", "Bamenda III"],
+    "Momo": ["Mbengwi"],
+    "Ngo-Ketunjia": ["Ndop"]
+  },
+  "Ouest": {
+    "Bamboutos": ["Mbouda"],
+    "Haut-Nkam": ["Bafang"],
+    "Hauts-Plateaux": ["Baham"],
+    "Koung-Khi": ["Bandjoun"],
+    "Menoua": ["Dschang"],
+    "Mifi": ["Bafoussam I", "Bafoussam II", "Bafoussam III"],
+    "Ndé": ["Bangangté"],
+    "Noun": ["Foumban"]
+  },
+  "Sud": {
+    "Dja-et-Lobo": ["Sangmélima", "Meyomessala"],
+    "Mvila": ["Ebolowa I", "Ebolowa II"],
+    "Océan": ["Kribi I", "Kribi II", "Akom II"],
+    "Vallée-du-Ntem": ["Ambam"]
+  },
+  "Sud-Ouest": {
+    "Fako": ["Limbe I", "Limbe II", "Limbe III", "Tiko", "Buea"],
+    "Koupé-Manengouba": ["Bangem"],
+    "Lebialem": ["Menji"],
+    "Manyu": ["Mamfé"],
+    "Meme": ["Kumba I", "Kumba II", "Kumba III"],
+    "Ndian": ["Mundemba"]
   }
 };

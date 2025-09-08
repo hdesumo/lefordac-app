@@ -36,9 +36,15 @@ export default function Adherer() {
   };
 
   const regions = Object.keys(cameroonData);
-  const departements = form.region ? Object.keys(cameroonData[form.region]) : [];
+  const departements =
+    form.region && cameroonData[form.region]
+      ? Object.keys(cameroonData[form.region])
+      : [];
   const arrondissements =
-    form.region && form.departement
+    form.region &&
+    form.departement &&
+    cameroonData[form.region] &&
+    cameroonData[form.region][form.departement]
       ? cameroonData[form.region][form.departement]
       : [];
 
