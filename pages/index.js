@@ -1,29 +1,29 @@
+import Link from "next/link";
+import News from "./news";
+
 export default function Home() {
   return (
-    <main className="flex flex-col items-center text-center px-6 md:px-12 py-16 bg-lefordac-light">
-      <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4 text-lefordac-primary">
-        Bienvenue au FORDAC
-      </h1>
-      <p className="text-lg md:text-xl text-lefordac-dark mb-8 max-w-2xl">
-        Forces Démocratiques pour l’Action et le Changement<br />
-        Un parti qui incarne la vision, l’action et le changement au service du peuple camerounais.
-      </p>
+    <div>
+      {/* Encart Mot du Président */}
+      <section className="bg-lefordac-light py-10">
+        <div className="max-w-4xl mx-auto text-center px-6">
+          <h2 className="text-2xl md:text-3xl font-bold text-lefordac-primary mb-4">
+            Le mot du Président
+          </h2>
+          <p className="italic text-gray-700 mb-6">
+            « Agir localement pour réussir nationalement »
+          </p>
+          <Link
+            href="/president"
+            className="inline-block bg-lefordac-primary text-white px-5 py-2 rounded hover:bg-lefordac-secondary transition"
+          >
+            Lire le discours complet
+          </Link>
+        </div>
+      </section>
 
-      {/* Section valeurs */}
-      <div className="grid md:grid-cols-3 gap-8 mt-12">
-        <div className="p-6 bg-white shadow rounded-lg">
-          <h3 className="text-xl font-bold text-lefordac-primary mb-2">Unité</h3>
-          <p>Rassembler les forces démocratiques pour un avenir commun.</p>
-        </div>
-        <div className="p-6 bg-white shadow rounded-lg">
-          <h3 className="text-xl font-bold text-lefordac-primary mb-2">Action</h3>
-          <p>Passer des paroles aux actes pour transformer la société.</p>
-        </div>
-        <div className="p-6 bg-white shadow rounded-lg">
-          <h3 className="text-xl font-bold text-lefordac-primary mb-2">Changement</h3>
-          <p>Construire une démocratie forte et inclusive.</p>
-        </div>
-      </div>
-    </main>
+      {/* Section Actualités */}
+      <News />
+    </div>
   );
 }
