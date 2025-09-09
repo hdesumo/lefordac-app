@@ -1,123 +1,131 @@
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import axios from "axios";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/pagination";
+
+// Liste des vidéos (placées dans /public/videos/fordac)
+const videos = [
+  "/videos/fordac/video1.mp4",
+  "/videos/fordac/video2.mp4",
+  "/videos/fordac/video3.mp4",
+  "/videos/fordac/video4.mp4",
+  "/videos/fordac/video5.mp4",
+  "/videos/fordac/video6.mp4",
+  "/videos/fordac/video7.mp4",
+  "/videos/fordac/video8.mp4",
+  "/videos/fordac/video9.mp4",
+  "/videos/fordac/video10.mp4",
+];
 
 export default function News() {
-  const [news, setNews] = useState([]);
+  const [articles, setArticles] = useState([]);
+  const [current, setCurrent] = useState(0);
 
+  // Récupération des articles depuis l’API
   useEffect(() => {
-    const fetchNews = async () => {
+    const fetchArticles = async () => {
       try {
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/news?page=1&limit=20`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/news`
         );
-        setNews(res.data.news || res.data);
+        setArticles(res.data);
       } catch (err) {
-        console.error("Erreur chargement news:", err);
+        console.error("Erreur chargement actualités:", err);
       }
     };
-    fetchNews();
+    fetchArticles();
   }, []);
 
-  const marqueeNews = news.filter((n) => n.highlightMarquee);
-  const carouselVideos = news.filter(
-    (n) => n.type === "video" && n.highlightCarousel
-  );
-  const articles = news.filter(
-    (n) => n.type === "article" || (!n.highlightCarousel && n.type !== "video")
-  );
+  // Lecture automatique des vidéos toutes les 12 secondes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % videos.length);
+    }, 12000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fonctions navigation manuelle
+  const prevVideo = () => {
+    setCurrent((prev) => (prev - 1 + videos.length) % videos.length);
+  };
+
+  const nextVideo = () => {
+    setCurrent((prev) => (prev + 1) % videos.length);
+  };
 
   return (
-    <>
-      {marqueeNews.length > 0 && (
-        <div className="bg-lefordac-primary text-white py-2 overflow-hidden">
-          <marquee behavior="scroll" direction="left" scrollamount="5" className="text-sm">
-            {marqueeNews.map((a) => (
-              <span key={a.id} className="mr-8">
-                📌 <Link href={`/news/${a.id}`}>{a.titre}</Link>
-              </span>
-            ))}
-          </marquee>
-        </div>
-      )}
+    <main className="w-full">
+      {/* === Carrousel vidéo === */}
+      <div className="relative w-full bg-black flex justify-center items-center">
+        <video
+          key={current}
+          src={videos[current]}
+          autoPlay
+          muted
+          loop
+          controls={false}
+          className="w-full max-h-[500px] object-cover"
+        />
 
-      <main className="flex-grow grid grid-cols-1 md:grid-cols-4 gap-6 p-6 bg-lefordac-light">
-        <div className="md:col-span-3 space-y-6">
-          <h1 className="text-3xl font-bold font-serif text-lefordac-primary mb-4">
-            Actualités
-          </h1>
+        {/* Boutons navigation */}
+        <button
+          onClick={prevVideo}
+          className="absolute left-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full"
+        >
+          ◀
+        </button>
+        <button
+          onClick={nextVideo}
+          className="absolute right-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full"
+        >
+          ▶
+        </button>
+      </div>
 
-          {carouselVideos.length > 0 && (
-            <div className="bg-white shadow p-4 rounded-lg">
-              <h2 className="text-2xl font-semibold text-lefordac-primary mb-3">
-                Vidéos à la Une
+      {/* === Liste des articles === */}
+      <div className="max-w-4xl mx-auto p-6 space-y-8">
+        <h1 className="text-3xl font-bold font-serif text-lefordac-primary mb-6">
+          Actualités
+        </h1>
+
+        {articles.length === 0 ? (
+          <p className="text-gray-600">Aucune actualité disponible pour le moment.</p>
+        ) : (
+          articles.map((article) => (
+            <div
+              key={article.id}
+              className="bg-white rounded-lg shadow p-6 space-y-3"
+            >
+              <h2 className="text-xl font-bold text-lefordac-primary">
+                {article.titre}
               </h2>
-              <Swiper
-                modules={[Autoplay, Pagination]}
-                spaceBetween={20}
-                slidesPerView={1}
-                autoplay={{ delay: 5000 }}
-                pagination={{ clickable: true }}
-              >
-                {carouselVideos.map((v) => (
-                  <SwiperSlide key={v.id}>
-                    <div className="flex flex-col items-center">
-                      <h3 className="text-lg font-semibold mb-2">{v.titre}</h3>
-                      {v.sousTitre && (
-                        <p className="text-sm italic text-gray-500 mb-2">
-                          {v.sousTitre}
-                        </p>
-                      )}
-                      <video controls className="w-full rounded">
-                        <source
-                          src={`${process.env.NEXT_PUBLIC_API_URL}${v.mediaUrl}`}
-                          type="video/mp4"
-                        />
-                      </video>
-                    </div>
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            </div>
-          )}
-
-          {articles.map((n) => (
-            <div key={n.id} className="bg-white shadow rounded-lg p-4">
-              <h2 className="text-xl font-semibold text-lefordac-primary">
-                <Link href={`/news/${n.id}`}>{n.titre}</Link>
-              </h2>
-              {n.sousTitre && (
-                <h3 className="text-md text-gray-500 italic">{n.sousTitre}</h3>
+              <h3 className="text-md italic text-gray-600">
+                {article.sousTitre}
+              </h3>
+              {/* Image ou vidéo associée */}
+              {article.mediaUrl && (
+                <div className="my-4">
+                  {article.mediaUrl.endsWith(".mp4") ? (
+                    <video
+                      controls
+                      className="w-full rounded-lg shadow"
+                      src={article.mediaUrl}
+                    />
+                  ) : (
+                    <img
+                      src={article.mediaUrl}
+                      alt={article.titre}
+                      className="w-full rounded-lg shadow"
+                    />
+                  )}
+                </div>
               )}
-              <p className="text-lefordac-dark mb-2">
-                {n.contenu && n.contenu.length > 120
-                  ? n.contenu.slice(0, 120) + "..."
-                  : n.contenu}
+              <p className="text-gray-800">{article.contenu}</p>
+              <p className="text-xs text-gray-500">
+                Publié le {new Date(article.createdAt).toLocaleDateString()}
               </p>
-              <Link
-                href={`/news/${n.id}`}
-                className="text-lefordac-secondary hover:underline"
-              >
-                Lire la suite →
-              </Link>
             </div>
-          ))}
-        </div>
-
-        <aside className="md:col-span-1 space-y-4">
-          <h2 className="text-lg font-bold text-lefordac-primary">Autres infos</h2>
-          <ul className="space-y-2 text-lefordac-dark text-sm">
-            <li>📌 Vision & Valeurs</li>
-            <li>📌 Discours du Président</li>
-            <li>📌 Galerie Photos</li>
-            <li>📌 Agenda des activités</li>
-          </ul>
-        </aside>
-      </main>
-    </>
+          ))
+        )}
+      </div>
+    </main>
   );
 }
