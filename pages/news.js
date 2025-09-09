@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Sidebar from "../components/Sidebar";
 
 // Liste des vidéos locales dans /public/videos/fordac
 const videos = [
@@ -18,8 +19,8 @@ const videos = [
 export default function News() {
   const [articles, setArticles] = useState([]);
   const [current, setCurrent] = useState(0);
+  const [autoPlay, setAutoPlay] = useState(true); // ✅ nouvel état
 
-  // Charger les articles depuis l’API
   useEffect(() => {
     const fetchArticles = async () => {
       try {
@@ -34,15 +35,36 @@ export default function News() {
     fetchArticles();
   }, []);
 
-  // Auto-défilement vidéos
+  // Auto-défilement vidéos si autoPlay est activé
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % videos.length);
-    }, 12000);
-    return () => clearInterval(interval);
-  }, []);
+    if (autoPlay) {
+      window.carouselTimer = setInterval(() => {
+        setCurrent((prev) => (prev + 1) % videos.length);
+      }, 12000);
+    }
 
-  // Navigation manuelle
+    return () => {
+      if (window.carouselTimer) {
+        clearInterval(window.carouselTimer);
+      }
+    };
+  }, [autoPlay]);
+
+  const stopCarousel = () => {
+    if (window.carouselTimer) {
+      clearInterval(window.carouselTimer);
+      window.carouselTimer = null;
+    }
+  };
+
+  const resumeCarousel = () => {
+    if (autoPlay && !window.carouselTimer) {
+      window.carouselTimer = setInterval(() => {
+        setCurrent((prev) => (prev + 1) % videos.length);
+      }, 12000);
+    }
+  };
+
   const prevVideo = () => {
     setCurrent((prev) => (prev - 1 + videos.length) % videos.length);
   };
@@ -50,10 +72,6 @@ export default function News() {
   const nextVideo = () => {
     setCurrent((prev) => (prev + 1) % videos.length);
   };
-
-  // Article à la une (le premier avec highlight=true, sinon le premier article)
-  const articleALaUne =
-    articles.find((a) => a.highlight === true) || articles[0] || null;
 
   return (
     <main className="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -66,13 +84,18 @@ export default function News() {
         {/* Carrousel vidéo */}
         <div className="relative w-full bg-black rounded-lg overflow-hidden shadow">
           <video
-            key={current}
             src={videos[current]}
-            autoPlay
             muted
-            loop
+            loop={false}
             controls
+            autoPlay
             className="w-full h-[350px] object-cover rounded-lg"
+            onPlay={stopCarousel}
+            onPause={resumeCarousel}
+            onEnded={() => {
+              setCurrent((prev) => (prev + 1) % videos.length);
+              resumeCarousel();
+            }}
           />
 
           {/* Boutons navigation */}
@@ -100,6 +123,18 @@ export default function News() {
               ></span>
             ))}
           </div>
+
+          {/* Toggle autoplay */}
+          <div className="absolute top-3 right-3 bg-black bg-opacity-60 text-white px-3 py-1 rounded cursor-pointer text-xs">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={autoPlay}
+                onChange={() => setAutoPlay(!autoPlay)}
+              />
+              Autoplay
+            </label>
+          </div>
         </div>
 
         {/* Liste des articles */}
@@ -121,8 +156,6 @@ export default function News() {
                 <h3 className="text-md italic text-gray-600">
                   {article.sousTitre}
                 </h3>
-
-                {/* Média associé */}
                 {article.mediaUrl && (
                   <div className="my-4">
                     {article.mediaUrl.endsWith(".mp4") ? (
@@ -130,6 +163,9 @@ export default function News() {
                         controls
                         className="w-full rounded-lg shadow"
                         src={article.mediaUrl}
+                        onPlay={stopCarousel}
+                        onPause={resumeCarousel}
+                        onEnded={resumeCarousel}
                       />
                     ) : (
                       <img
@@ -140,7 +176,6 @@ export default function News() {
                     )}
                   </div>
                 )}
-
                 <p className="text-gray-800">{article.contenu}</p>
                 <p className="text-xs text-gray-500">
                   Publié le {new Date(article.createdAt).toLocaleDateString()}
@@ -151,79 +186,8 @@ export default function News() {
         </div>
       </div>
 
-      {/* === Sidebar sticky === */}
-      <aside className="space-y-6 self-start sticky top-24">
-        {/* Bloc À la une */}
-        {articleALaUne && (
-          <a
-            href={`#article-${articleALaUne.id}`}
-            className="block bg-lefordac-light p-4 rounded shadow hover:shadow-lg transition"
-          >
-            <h3 className="font-bold text-lefordac-primary mb-2">À la une</h3>
-
-            {/* Image miniature si disponible */}
-            {articleALaUne.mediaUrl &&
-              (articleALaUne.mediaUrl.endsWith(".mp4") ? null : (
-                <img
-                  src={articleALaUne.mediaUrl}
-                  alt={articleALaUne.titre}
-                  className="w-full h-40 object-cover rounded mb-3 shadow"
-                />
-              ))}
-
-            <h4 className="text-md font-semibold">{articleALaUne.titre}</h4>
-            <p className="text-sm italic text-gray-600">
-              {articleALaUne.sousTitre}
-            </p>
-            <span className="text-lefordac-secondary text-sm underline block mt-2">
-              Lire l’article →
-            </span>
-          </a>
-        )}
-
-        {/* Dernières actus */}
-        <section className="bg-white p-4 rounded shadow">
-          <h3 className="font-bold text-lefordac-primary mb-2">
-            Dernières actus
-          </h3>
-          <ul className="space-y-2 text-sm">
-            {articles.slice(0, 5).map((a) => (
-              <li key={a.id}>
-                <a
-                  href={`#article-${a.id}`}
-                  className="block hover:text-lefordac-secondary"
-                >
-                  {a.titre}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {/* Liens rapides */}
-        <section className="bg-white p-4 rounded shadow">
-          <h3 className="font-bold text-lefordac-primary mb-2">
-            Liens rapides
-          </h3>
-          <ul className="space-y-2 text-sm">
-            <li>
-              <a href="/president" className="hover:text-lefordac-secondary">
-                Le mot du Président
-              </a>
-            </li>
-            <li>
-              <a href="/adherer" className="hover:text-lefordac-secondary">
-                Adhérer
-              </a>
-            </li>
-            <li>
-              <a href="/contact" className="hover:text-lefordac-secondary">
-                Contact
-              </a>
-            </li>
-          </ul>
-        </section>
-      </aside>
+      {/* === Sidebar dynamique === */}
+      <Sidebar articles={articles} />
     </main>
   );
 }
